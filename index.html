@@ -232,6 +232,7 @@
             font-weight: 700;
             font-feature-settings: "tnum";
             font-variant-numeric: tabular-nums;
+            color: var(--text-main);
         }
 
         .indicator {
@@ -239,6 +240,21 @@
             height: 10px;
             border-radius: 50%;
             display: inline-block;
+        }
+        .indicator.mean { background: var(--color-mean); }
+        .indicator.median { background: var(--color-median); }
+        .indicator.p99 { background: var(--color-p99); }
+
+        .cors-warning svg {
+            flex-shrink: 0;
+        }
+        .input-group.request-count {
+            flex: 0 1 150px;
+        }
+        #statusText {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 400;
         }
 
         /* --- Chart Area --- */
@@ -282,6 +298,36 @@
                 width: 100%;
             }
         }
+
+        /* --- FAQ Section --- */
+        .faq-panel {
+            margin-top: 24px;
+        }
+        .faq-header {
+            justify-content: flex-start;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .faq-header svg {
+            color: var(--accent-blue);
+        }
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+            padding: 0 8px;
+        }
+        .faq-item h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+        .faq-item p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
     </style>
 </head>
 <body>
@@ -292,7 +338,7 @@
     </div>
 
     <div class="cors-warning">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
         <div>
             <strong>CORS Security Notice</strong>
             Due to strict browser Same-Origin policies, fetching external URLs will fail unless the target server returns proper <code>Access-Control-Allow-Origin</code> headers. This tool uses <code>no-cors</code> mode to measure latency, which means HTTP status codes cannot be read (all requests will appear opaque). For full visibility and status codes, test APIs that support CORS or use a local proxy.
@@ -304,7 +350,7 @@
             <label for="urlInput">Target URL</label>
             <input type="url" id="urlInput" value="https://jsonplaceholder.typicode.com/posts/1" placeholder="https://api.example.com/data">
         </div>
-        <div class="input-group" style="flex: 0 1 150px;">
+        <div class="input-group request-count">
             <label for="countInput">Request Count</label>
             <input type="number" id="countInput" value="50" min="1" max="1000">
         </div>
@@ -319,7 +365,7 @@
         <div class="panel">
             <div class="panel-header">
                 <span>Real-time Latency</span>
-                <span id="statusText" style="color: var(--text-muted); font-size: 0.9rem; font-weight: 400;">Ready</span>
+                <span id="statusText">Ready</span>
             </div>
             <div class="chart-container">
                 <canvas id="benchmarkChart"></canvas>
@@ -330,17 +376,60 @@
             <div class="panel-header">Live Metrics</div>
             <div class="metrics-grid">
                 <div class="metric-card">
-                    <div class="metric-title"><span class="indicator" style="background: var(--color-mean)"></span> Mean</div>
-                    <div class="metric-value" id="valMean" style="color: var(--text-main)">0.00 ms</div>
+                    <div class="metric-title"><span class="indicator mean"></span> Mean</div>
+                    <div class="metric-value" id="valMean">0.00 ms</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-title"><span class="indicator" style="background: var(--color-median)"></span> Median</div>
-                    <div class="metric-value" id="valMedian" style="color: var(--text-main)">0.00 ms</div>
+                    <div class="metric-title"><span class="indicator median"></span> Median</div>
+                    <div class="metric-value" id="valMedian">0.00 ms</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-title"><span class="indicator" style="background: var(--color-p99)"></span> 99th Percentile</div>
-                    <div class="metric-value" id="valP99" style="color: var(--text-main)">0.00 ms</div>
+                    <div class="metric-title"><span class="indicator p99"></span> 99th Percentile</div>
+                    <div class="metric-value" id="valP99">0.00 ms</div>
                 </div>
+            </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="panel faq-panel">
+        <div class="panel-header faq-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span>Understanding Response Time Metrics</span>
+        </div>
+        <div class="faq-list">
+            <div class="faq-item">
+                <h3>What is Mean (Average) Response Time?</h3>
+                <p>
+                    The mean response time is the arithmetic average (summing all response times and dividing by the number of requests). While it is useful for estimating overall throughput limits, it is not a great metric for determining the "typical" user experience because large outliers can heavily skew the number.
+                </p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>What is the Median (p50)?</h3>
+                <p>
+                    If you sort all response times from fastest to slowest, the median is the exact halfway point. If your median is 200ms, half your requests return faster than 200ms, and half take longer. It is widely considered better than the mean for understanding how long users <em>typically</em> have to wait.
+                </p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>What are High Percentiles (Tail Latencies)?</h3>
+                <p>
+                    High percentiles help figure out how bad your outliers are. For example, the 99th percentile (p99) indicates that 99 out of 100 requests complete within this time, while only 1 request takes longer. These are known as "tail latencies" and they directly affect users’ experience.
+                </p>
+            </div>
+            
+            <div class="faq-item">
+                <h3>Why do Tail Latencies matter?</h3>
+                <p>
+                    Major companies like Amazon focus heavily on high percentiles (like p99.9). The customers experiencing the slowest requests are often those with the most data on their accounts—meaning they are the most active and valuable customers. It is critical to keep those specific customers happy by ensuring the service remains fast for them.
+                </p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Should we optimize for the absolute worst-case scenario?</h3>
+                <p>
+                    Generally, no. Optimizing the 99.99th percentile (the slowest 1 in 10,000 requests) is often deemed too expensive for the diminishing returns it provides. Response times at extremely high percentiles are easily affected by random external events outside of your control (like variation in network delay, known as jitter).
+                </p>
             </div>
         </div>
     </div>
