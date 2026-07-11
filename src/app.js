@@ -1,4 +1,4 @@
-import { calculateMean, calculateMedian, calculateP99 } from './metrics.js';
+import { runBenchmark } from './benchmark.js';
 
 Chart.defaults.color = '#94a3b8';
 Chart.defaults.font.family = "'Inter', sans-serif";
@@ -124,55 +124,29 @@ runBtn.addEventListener('click', async () => {
     valMedian.textContent = '0.00 ms';
     valP99.textContent = '0.00 ms';
 
-    const responseTimes = [];
-
-    for (let i = 1; i <= count; i++) {
-        statusText.textContent = `Fetching ${i} of ${count}...`;
+    await runBenchmark(url, count, (progress) => {
+        statusText.textContent = `Fetching ${progress.requestNumber} of ${count}...`;
         
-        const start = performance.now();
-        let success = false;
-        
-        try {
-            await fetch(url, { cache: 'no-store', mode: 'no-cors' });
-            success = true;
-        } catch (err) {
-            console.error(`Request ${i} failed`, err);
-        }
-        
-        const duration = performance.now() - start;
-        
-        if (success) {
-            responseTimes.push(duration);
-        }
+        chart.data.labels.push(progress.requestNumber);
+        chart.data.datasets[0].data.push(progress.duration);
 
-        chart.data.labels.push(i);
-        chart.data.datasets[0].data.push(duration);
+        if (progress.metrics.mean !== null) {
+            valMean.textContent = progress.metrics.mean.toFixed(2) + ' ms';
+            valMedian.textContent = progress.metrics.median.toFixed(2) + ' ms';
+            valP99.textContent = progress.metrics.p99.toFixed(2) + ' ms';
 
-        if (responseTimes.length > 0) {
-            const currentMean = calculateMean(responseTimes);
-            const currentMedian = calculateMedian(responseTimes);
-            const currentP99 = calculateP99(responseTimes);
-
-            valMean.textContent = currentMean.toFixed(2) + ' ms';
-            valMedian.textContent = currentMedian.toFixed(2) + ' ms';
-            valP99.textContent = currentP99.toFixed(2) + ' ms';
-
-            annotations.lineMean.yMin = currentMean;
-            annotations.lineMean.yMax = currentMean;
+            annotations.lineMean.yMin = progress.metrics.mean;
+            annotations.lineMean.yMax = progress.metrics.mean;
             
-            annotations.lineMedian.yMin = currentMedian;
-            annotations.lineMedian.yMax = currentMedian;
+            annotations.lineMedian.yMin = progress.metrics.median;
+            annotations.lineMedian.yMax = progress.metrics.median;
             
-            annotations.lineP99.yMin = currentP99;
-            annotations.lineP99.yMax = currentP99;
+            annotations.lineP99.yMin = progress.metrics.p99;
+            annotations.lineP99.yMax = progress.metrics.p99;
         }
 
         chart.update();
-
-        if (i < count) {
-            await new Promise(r => setTimeout(r, 50));
-        }
-    }
+    });
 
     statusText.textContent = 'Benchmark Complete';
     statusText.style.color = '#10b981';

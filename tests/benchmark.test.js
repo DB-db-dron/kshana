@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { runBenchmark } from '../src/benchmark.js';
 
 describe('Live URL Benchmark Runner', () => {
@@ -10,11 +10,15 @@ describe('Live URL Benchmark Runner', () => {
 
         console.log(`\n🚀 Vitest: Starting benchmark against ${TARGET_URL}...`);
         
-        const results = await runBenchmark(TARGET_URL, REQUEST_COUNT);
+        const onProgress = vi.fn();
+        const results = await runBenchmark(TARGET_URL, REQUEST_COUNT, onProgress);
         
         console.log('\n📊 Vitest: Benchmark Completed! Data object:');
         console.dir(results, { depth: null });
 
+        // Verify the benchmark callback fired correctly
+        expect(onProgress).toHaveBeenCalledTimes(REQUEST_COUNT);
+        
         // Verify the benchmark function returns the expected object structure
         expect(results).toBeDefined();
         expect(results.url).toBe(TARGET_URL);

@@ -4,9 +4,10 @@ import { calculateMean, calculateMedian, calculateP99 } from './metrics.js';
  * Runs a benchmark against a given URL by making sequential fetch requests.
  * @param {string} url - The target URL to benchmark
  * @param {number} count - The number of fetch requests to execute
+ * @param {Function} [onProgress] - Optional callback fired after each request
  * @returns {Promise<Object>} An object containing the raw timeline and summary metrics
  */
-export async function runBenchmark(url, count) {
+export async function runBenchmark(url, count, onProgress) {
     const timeline = [];
     const responseTimes = [];
 
@@ -38,6 +39,23 @@ export async function runBenchmark(url, count) {
         if (success) {
             responseTimes.push(duration);
         }
+
+        if (onProgress) {
+            const currentMetrics = {
+                mean: calculateMean(responseTimes),
+                median: calculateMedian(responseTimes),
+                p99: calculateP99(responseTimes)
+            };
+            
+            onProgress({
+                requestNumber: i,
+                duration,
+                success,
+                error: errorMsg,
+                metrics: currentMetrics
+            });
+        }
+
         if (i < count) {
             await new Promise(resolve => setTimeout(resolve, 50));
         }
