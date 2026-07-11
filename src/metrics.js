@@ -26,7 +26,6 @@ function sortNumeric(arr) {
  */
 export function calculateMedian(arr) {
     if (!arr || arr.length === 0) return null;
-    // Use helper to create a sorted copy to prevent mutating the original array
     const sorted = sortNumeric(arr);
     const mid = Math.floor(sorted.length / 2);
     
@@ -44,8 +43,7 @@ export function calculateMedian(arr) {
  */
 export function calculateP99(arr) {
     if (!arr || arr.length === 0) return null;
-    // Use helper to create a sorted copy to prevent mutating the original array
     const sorted = sortNumeric(arr);
     const index = Math.ceil(0.99 * sorted.length) - 1;
-    return sorted[Math.max(0, index)]; // Use max to ensure index is not negative, though min index is 0
+    return sorted[Math.max(0, index)]; 
 }
