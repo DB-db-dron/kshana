@@ -37,8 +37,7 @@
             --color-mean: #ef4444;    /* Red */
             --color-median: #10b981;  /* Green */
             --color-p99: #f59e0b;     /* Yellow */
-            --warning-bg: rgba(245, 158, 11, 0.1);
-            --warning-border: #f59e0b;
+
         }
 
         * {
@@ -77,29 +76,6 @@
             font-weight: 600;
         }
 
-        .cors-warning {
-            background-color: var(--warning-bg);
-            border: 1px solid var(--warning-border);
-            color: #fbbf24;
-            padding: 14px 18px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .cors-warning strong {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 0.95rem;
-            color: #fcd34d;
-        }
-
-        .cors-warning svg {
-            flex-shrink: 0;
-        }
 
         /* --- Controls --- */
         .controls {
@@ -365,13 +341,6 @@
         <h1>Kshana</h1>
     </div>
 
-    <div class="cors-warning">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-        <div>
-            <strong>CORS Security Notice</strong>
-            Due to strict browser Same-Origin policies, fetching external URLs will fail unless the target server returns proper <code>Access-Control-Allow-Origin</code> headers. This tool uses <code>no-cors</code> mode to measure latency, which means HTTP status codes cannot be read (all requests will appear opaque). For full visibility and status codes, test APIs that support CORS or use a local proxy.
-        </div>
-    </div>
 
     <div class="controls">
         <div class="input-group">
