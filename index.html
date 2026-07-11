@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kshana</title>
+    
+    <!-- Google Fonts for clean typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js & Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+
+    <style>
+        /* Dark Mode Color Palette inspired by modern dashboards */
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: #1a2235;
+            --border-color: #2a3441;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-blue-hover: #2563eb;
+            --color-mean: #ef4444;    /* Red */
+            --color-median: #10b981;  /* Green */
+            --color-p99: #f59e0b;     /* Yellow */
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --warning-border: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- Header & Warning --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .cors-warning {
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            color: #fbbf24;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .cors-warning strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+            color: #fcd34d;
+        }
+
+        /* --- Controls --- */
+        .controls {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        button {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0 24px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            height: 44px; /* aligns with input height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 180px;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--accent-blue-hover);
+        }
+        
+        button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* --- Dashboard Layout --- */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- Metrics Sidebar --- */
+        .metrics-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .metric-card {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .metric-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+        }
+
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* --- Chart Area --- */
+        .chart-container {
+            position: relative;
+            flex: 1;
+            min-height: 400px;
+            width: 100%;
+        }
+
+        /* --- Spinner --- */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        button.loading .spinner {
+            display: block;
+        }
+        button.loading .icon {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Kshana</h1>
+    </div>
+
+    <div class="cors-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <div>
+            <strong>CORS Security Notice</strong>
+            Due to strict browser Same-Origin policies, fetching external URLs will fail unless the target server returns proper <code>Access-Control-Allow-Origin</code> headers. This tool uses <code>no-cors</code> mode to measure latency, which means HTTP status codes cannot be read (all requests will appear opaque). For full visibility and status codes, test APIs that support CORS or use a local proxy.
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="input-group">
+            <label for="urlInput">Target URL</label>
+            <input type="url" id="urlInput" value="https://jsonplaceholder.typicode.com/posts/1" placeholder="https://api.example.com/data">
+        </div>
+        <div class="input-group" style="flex: 0 1 150px;">
+            <label for="countInput">Request Count</label>
+            <input type="number" id="countInput" value="50" min="1" max="1000">
+        </div>
+        <button id="runBtn">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span class="spinner"></span>
+            <span class="btn-text">Run Benchmark</span>
+        </button>
+    </div>
+
+    <div class="dashboard">
+        <div class="panel">
+            <div class="panel-header">
+                <span>Real-time Latency</span>
+                <span id="statusText" style="color: var(--text-muted); font-size: 0.9rem; font-weight: 400;">Ready</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="benchmarkChart"></canvas>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">Live Metrics</div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-title"><span class="indicator" style="background: var(--color-mean)"></span> Mean</div>
+                    <div class="metric-value" id="valMean" style="color: var(--text-main)">0.00 ms</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title"><span class="indicator" style="background: var(--color-median)"></span> Median</div>
+                    <div class="metric-value" id="valMedian" style="color: var(--text-main)">0.00 ms</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title"><span class="indicator" style="background: var(--color-p99)"></span> 99th Percentile</div>
+                    <div class="metric-value" id="valP99" style="color: var(--text-main)">0.00 ms</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="./src/app.js"></script>
+
+</body>
+</html>
